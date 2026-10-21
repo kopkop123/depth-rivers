@@ -8,6 +8,8 @@ import Header from './components/Header.vue'
 const mapElement = ref(null)
 let map
 
+const goHome = () => map?.setView([48.7, 31.2], 6)
+
 onMounted(() => {
     map = L.map(mapElement.value).setView([51.505, -0.09], 13)
 
@@ -24,17 +26,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Header />
+    <Header @go-home="goHome" />
     <main class="page">
-        <header class="page-header">
-            <p class="eyebrow">Тестовий проєкт</p>
-            <h1>Станції вимірювання рівня води</h1>
-            <p class="intro">Додайте інтерфейс для пошуку станцій і перегляду їхніх вимірювань.</p>
-        </header>
-
         <section class="map-placeholder" aria-label="Місце для карти станцій">
-            <!--            <img src="/map-background.svg" alt="Схематичне тло карти"/>-->
-            <!--            <p>Місце для карти</p>-->
             <div ref="mapElement" id="map"></div>
         </section>
     </main>
