@@ -26,18 +26,31 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <Header @go-home="goHome" />
-    <main class="page">
-        <section class="map-placeholder" aria-label="Місце для карти станцій">
+    <main class="app">
+        <Header @go-home="goHome" />
+
+        <section class="page">
+            <aside>1</aside>
             <div ref="mapElement" id="map"></div>
+            <aside>3</aside>
         </section>
     </main>
 </template>
 
-<style>
-#map {
+<style scoped>
+.app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.page {
+    margin: 0 auto;
+    padding: 48px 28px;
+    flex: 1;
+    display: grid;
+    grid-template-columns: 320px minmax(320px, 1fr) 360px;
+    gap: 12px;
     width: 100%;
-    height: min(65vh, 520px);
-    min-height: 400px;
 }
 </style>

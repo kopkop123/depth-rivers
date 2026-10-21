@@ -32,53 +32,8 @@ input {
     font: inherit;
 }
 
-.page {
-    width: min(1180px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 48px 0;
-}
-
 h1 {
     margin: 0;
     font-size: clamp(1.8rem, 4vw, 2.8rem);
     line-height: 1.12;
-}
-
-.map-placeholder {
-    position: relative;
-    display: grid;
-    min-height: 520px;
-    place-items: center;
-    overflow: hidden;
-    border: 1px solid #d6e2dc;
-    border-radius: 18px;
-    background: #eaf2ed;
-}
-
-.map-placeholder img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.map-placeholder p {
-    position: relative;
-    margin: 0;
-    padding: 10px 14px;
-    border: 1px solid #d6e2dc;
-    border-radius: 8px;
-    background: rgb(255 255 255 / 88%);
-    color: #526a64;
-}
-
-@media (max-width: 600px) {
-    .page {
-        width: min(100% - 24px, 1180px);
-        padding: 28px 0;
-    }
-
-    .map-placeholder {
-        min-height: 400px;
-    }
 }
