@@ -138,7 +138,7 @@ export function useStations({
 
         try {
             const result = await requestJson(
-                `/api/stations/${encodeURIComponent(station.id)}/measurements?limit=12`,
+                `/api/stations/${encodeURIComponent(station.id)}/measurements`,
                 measurementController.signal,
             )
 

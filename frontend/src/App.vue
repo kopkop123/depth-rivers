@@ -2,11 +2,30 @@
 import { ref } from 'vue'
 import Header from './components/Header.vue'
 import Map from './components/Map.vue'
+import StationCard from './components/StationCard.vue'
 
 const mapComponentRef = ref(null)
+const stationState = ref({
+    selectedStation: null,
+    measurements: [],
+    loadingMeasurements: false,
+    measurementsError: '',
+})
+
+function onStationState(state) {
+    stationState.value = state
+}
 
 const goHome = () => {
     mapComponentRef.value?.goHome()
+}
+
+function closeStationCard() {
+    mapComponentRef.value?.clearSelectedStation()
+}
+
+function retryMeasurements() {
+    mapComponentRef.value?.retryMeasurements()
 }
 </script>
 
@@ -16,8 +35,12 @@ const goHome = () => {
 
         <section class="page">
             <aside>1</aside>
-            <Map ref="mapComponentRef" />
-            <aside>3</aside>
+            <Map ref="mapComponentRef" @station-state="onStationState" />
+            <StationCard
+                v-bind="stationState"
+                @close="closeStationCard"
+                @retry="retryMeasurements"
+            />
         </section>
     </main>
 </template>

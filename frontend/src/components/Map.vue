@@ -17,11 +17,13 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, nextTick } from 'vue'
+import { onMounted, onUnmounted, ref, nextTick, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useStations } from '../composables/useStations.js'
 import { escapeHtml, formatNumber } from '../utils/utils.js'
+
+const emit = defineEmits(['station-state'])
 
 const HOME_COORDINATES = [48.7, 31.2]
 
@@ -142,8 +144,27 @@ onUnmounted(() => {
     map?.remove()
 })
 
+watch(
+    [selectedStation, measurements, loadingMeasurements, measurementsError],
+    () => {
+        emit('station-state', {
+            selectedStation: selectedStation.value,
+            measurements: measurements.value,
+            loadingMeasurements: loadingMeasurements.value,
+            measurementsError: measurementsError.value,
+        })
+    },
+    { immediate: true },
+)
+
 defineExpose({
     goHome,
+    clearSelectedStation,
+    retryMeasurements() {
+        if (selectedStation.value) {
+            selectStation(selectedStation.value, { pan: false })
+        }
+    },
 })
 </script>
 
@@ -231,23 +252,6 @@ defineExpose({
         color: #168e78;
         font-size: 14px;
         margin-right: 4px;
-    }
-}
-
-.spinner {
-    width: 12px;
-    height: 12px;
-    border: 2px solid #dcebe5;
-    border-top-color: #168e78;
-    border-radius: 50%;
-    display: inline-block;
-    animation: spin 0.7s linear infinite;
-    flex-shrink: 0;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
     }
 }
 </style>
