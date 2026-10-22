@@ -194,6 +194,5 @@ export function useStations({
         loadStations,
         selectStation,
         clearSelectedStation,
-        cancelRequests,
     }
 }

@@ -29,7 +29,6 @@ const HOME_COORDINATES = [48.7, 31.2]
 
 const mapElement = ref(null)
 const search = ref('')
-const mobilePanel = ref('stations')
 
 let map
 let markersLayer
@@ -73,10 +72,6 @@ const {
                 animate: true,
             })
         }
-    },
-
-    onSelect() {
-        mobilePanel.value = 'details'
     },
 })
 
