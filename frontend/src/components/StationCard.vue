@@ -346,6 +346,9 @@ const chartPoints = computed(() => {
 
 .station-card {
     position: relative;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #dce7e1 transparent;
 }
 
 .station-card__title {

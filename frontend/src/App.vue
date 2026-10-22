@@ -84,8 +84,17 @@ function closeSidebars() {
 
         <section class="page">
             <button
+                class="station-search-button"
+                @click="isSearchSidebarOpen ? closeSidebars() : openSearchSidebar()"
+                type="button"
+            >
+                <span aria-hidden="true">☰</span>
+                Станції
+            </button>
+            <button
                 class="station-card-button"
                 @click="isStationCardOpen ? closeSidebars() : openStationCard()"
+                type="button"
             >
                 <span aria-hidden="true">▤</span>
                 Дані станції
@@ -112,6 +121,8 @@ function closeSidebars() {
                 @clear-search="clearSearch"
                 @retry-stations="retryStations"
                 @focus-station="focusStation"
+                class="page__search-sidebar"
+                :class="{ 'is-open': isSearchSidebarOpen }"
             />
             <Map
                 ref="mapComponentRef"
@@ -170,7 +181,8 @@ function closeSidebars() {
     opacity: 0;
 }
 
-.station-card-button {
+.station-card-button,
+.station-search-button {
     display: none;
     position: absolute;
     top: 8px;
@@ -182,6 +194,11 @@ function closeSidebars() {
     font-size: 10px;
     padding: 8px 10px;
     color: #7c9187;
+}
+
+.station-search-button {
+    right: auto;
+    left: 28px;
 }
 
 @media (max-width: 1260px) {
@@ -218,8 +235,44 @@ function closeSidebars() {
         padding: 48px 16px;
     }
 
+    .page__search-sidebar {
+        position: absolute;
+        top: 48px;
+        left: 0;
+        bottom: 48px;
+        z-index: 2100;
+        max-width: 320px;
+        width: 100%;
+        transform: translateX(-100%);
+        transition: transform 0.28s ease;
+    }
+
+    .page__search-sidebar.is-open {
+        transform: translateX(0);
+    }
+
     .station-card-button {
         right: 16px;
+    }
+
+    .station-search-button {
+        display: block;
+        left: 16px;
+    }
+}
+
+@media (max-width: 420px) {
+    .page__search-sidebar,
+    .page__station-card {
+        max-width: calc(100% - 32px);
+    }
+
+    .page__search-sidebar.is-open {
+        transform: translateX(16px);
+    }
+
+    .page__station-card.is-open {
+        transform: translateX(-16px);
     }
 }
 </style>
