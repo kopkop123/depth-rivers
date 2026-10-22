@@ -634,6 +634,8 @@ const chartPoints = computed(() => {
 .station-card__list {
     max-height: 260px;
     overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #dce7e1 transparent;
 }
 
 .station-card__list-row {

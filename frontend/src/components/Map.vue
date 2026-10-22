@@ -23,7 +23,7 @@ import 'leaflet/dist/leaflet.css'
 import { useStations } from '../composables/useStations.js'
 import { escapeHtml, formatNumber } from '../utils/utils.js'
 
-const emit = defineEmits(['station-state'])
+const emit = defineEmits(['station-state', 'stations-state'])
 
 const HOME_COORDINATES = [48.7, 31.2]
 
@@ -34,6 +34,8 @@ const mobilePanel = ref('stations')
 let map
 let markersLayer
 let moveTimer
+let searchTimer
+
 const mapReady = ref(false)
 const markers = new Map()
 
@@ -117,6 +119,25 @@ function renderMarkers() {
     })
 }
 
+function searchStations(query) {
+    search.value = query
+
+    clearTimeout(searchTimer)
+
+    searchTimer = setTimeout(() => {
+        loadStations({ query: query.trim() })
+    }, 300)
+}
+
+function retryStations() {
+    clearTimeout(searchTimer)
+    loadStations({ query: search.value.trim() })
+}
+
+function focusStation(station) {
+    selectStation(station)
+}
+
 onMounted(async () => {
     map = L.map(mapElement.value, { preferCanvas: true }).setView(HOME_COORDINATES, 6)
 
@@ -141,6 +162,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
     clearTimeout(moveTimer)
+    clearTimeout(searchTimer)
     map?.remove()
 })
 
@@ -157,9 +179,27 @@ watch(
     { immediate: true },
 )
 
+watch(
+    [stations, selectedId, loadingStations, stationsError, mapNotice],
+    () => {
+        emit('stations-state', {
+            stations: stations.value,
+            selectedId: selectedId.value,
+            loadingStations: loadingStations.value,
+            stationsError: stationsError.value,
+            mapNotice: mapNotice.value,
+        })
+    },
+    { immediate: true },
+)
+
 defineExpose({
     goHome,
     clearSelectedStation,
+    searchStations,
+    retryStations,
+    focusStation,
+
     retryMeasurements() {
         if (selectedStation.value) {
             selectStation(selectedStation.value, { pan: false })

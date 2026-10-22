@@ -3,8 +3,19 @@ import { ref } from 'vue'
 import Header from './components/Header.vue'
 import Map from './components/Map.vue'
 import StationCard from './components/StationCard.vue'
+import SearchSidebar from './components/SearchSidebar.vue'
 
 const mapComponentRef = ref(null)
+const search = ref('')
+
+const stationsState = ref({
+    stations: [],
+    selectedId: null,
+    loadingStations: false,
+    stationsError: '',
+    mapNotice: '',
+})
+
 const stationState = ref({
     selectedStation: null,
     measurements: [],
@@ -14,6 +25,27 @@ const stationState = ref({
 
 function onStationState(state) {
     stationState.value = state
+}
+
+function onStationsState(state) {
+    stationsState.value = state
+}
+
+function onSearchInput() {
+    mapComponentRef.value?.searchStations(search.value)
+}
+
+function clearSearch() {
+    search.value = ''
+    mapComponentRef.value?.searchStations('')
+}
+
+function retryStations() {
+    mapComponentRef.value?.retryStations()
+}
+
+function focusStation(station) {
+    mapComponentRef.value?.focusStation(station)
 }
 
 const goHome = () => {
@@ -34,8 +66,23 @@ function retryMeasurements() {
         <Header @go-home="goHome" />
 
         <section class="page">
-            <aside>1</aside>
-            <Map ref="mapComponentRef" @station-state="onStationState" />
+            <SearchSidebar
+                v-model:search="search"
+                :stations="stationsState.stations"
+                :selected-id="stationsState.selectedId"
+                :loading-stations="stationsState.loadingStations"
+                :stations-error="stationsState.stationsError"
+                :map-notice="stationsState.mapNotice"
+                @search-input="onSearchInput"
+                @clear-search="clearSearch"
+                @retry-stations="retryStations"
+                @focus-station="focusStation"
+            />
+            <Map
+                ref="mapComponentRef"
+                @station-state="onStationState"
+                @stations-state="onStationsState"
+            />
             <StationCard
                 v-bind="stationState"
                 @close="closeStationCard"
