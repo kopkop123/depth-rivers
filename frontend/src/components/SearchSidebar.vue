@@ -118,7 +118,24 @@
                 </button>
 
                 <div class="sidebar__list-item-footer">
-                    Показано до 100 станцій у поточній області
+                    <template v-if="total > stations.length">
+                        Показано {{ formatInteger(stations.length) }} із
+                        {{ formatInteger(total) }} станцій
+                        <button
+                            type="button"
+                            class="sidebar__more-button"
+                            :disabled="loadingStations"
+                            @click="emit('load-more')"
+                        >
+                            Показати ще
+                        </button>
+                        <p v-if="!search.trim()">
+                            Або наблизьте карту, щоб побачити станції у потрібному місці
+                        </p>
+                    </template>
+                    <template v-else>
+                        {{ search.trim() ? 'Усі станції за запитом' : 'Усі станції в цій області' }}
+                    </template>
                 </div>
             </template>
         </div>
@@ -131,7 +148,7 @@
 </template>
 
 <script setup>
-import { formatDateTime, formatNumber } from '../utils/utils.js'
+import { formatDateTime, formatInteger, formatNumber } from '../utils/utils.js'
 
 defineProps({
     search: {
@@ -158,6 +175,10 @@ defineProps({
         type: String,
         default: '',
     },
+    total: {
+        type: Number,
+        default: 0,
+    },
 })
 
 const emit = defineEmits([
@@ -166,6 +187,7 @@ const emit = defineEmits([
     'clear-search',
     'retry-stations',
     'focus-station',
+    'load-more',
 ])
 </script>
 
@@ -418,6 +440,28 @@ const emit = defineEmits([
     color: #9aaba4;
     font-size: 9px;
     text-align: center;
+}
+
+.sidebar__more-button {
+    display: block;
+    margin: 8px auto 0;
+    padding: 7px 12px;
+    border: 1px solid #cfe5db;
+    border-radius: 8px;
+    background: #f3faf6;
+    color: #168e78;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+}
+
+.sidebar__list-item-footer p {
+    margin: 8px 0 0;
 }
 
 .sidebar__list-empty {

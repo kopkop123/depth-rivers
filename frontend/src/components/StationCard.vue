@@ -47,8 +47,7 @@
                     class="station-card__trend-delta"
                     :class="`trend-${trend}`"
                 >
-                    {{ measurements[0].value - measurements[1].value > 0 ? '+' : '' }}
-                    {{ (measurements[0].value - measurements[1].value).toFixed(2) }} м
+                    {{ trendDeltaText }}
                 </span>
             </div>
 
@@ -84,7 +83,8 @@
             </div>
             <div v-else-if="filteredMeasurements.length" class="station-card__chart-wrapper">
                 <div class="station-card__chart-labels">
-                    <span>{{ chartMinMax.max }} м</span><span>{{ chartMinMax.min }} м</span>
+                    <span>{{ chartMinMax.max }} {{ unit }}</span
+                    ><span>{{ chartMinMax.min }} {{ unit }}</span>
                 </div>
                 <svg
                     class="station-card__chart"
@@ -164,15 +164,16 @@
 
                     <span class="station-card__list-date">
                         <strong>
-                            {{ formatDate(measurement.measuredAt, { year: 'numeric' }) }}
-                        </strong>
-                        <small>
                             {{
                                 formatDate(measurement.measuredAt, {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
                                 })
                             }}
+                        </strong>
+                        <small>
+                            {{ formatTime(measurement.measuredAt) }}
                         </small>
                     </span>
                     <span class="station-card__list-distance">
@@ -215,7 +216,7 @@
 
 <script setup>
 import { computed, ref, toRefs } from 'vue'
-import { formatDate, formatDateTime, formatNumber } from '../utils/utils.js'
+import { formatDate, formatDateTime, formatNumber, formatTime } from '../utils/utils.js'
 
 const props = defineProps({
     selectedStation: {
@@ -271,6 +272,15 @@ const trendDelta = computed(() => {
     )
 
     return Number(sorted[0].value) - Number(sorted[1].value)
+})
+
+const unit = computed(() => props.selectedStation?.latestMeasurement?.unit || 'м')
+
+const trendDeltaText = computed(() => {
+    const delta = trendDelta.value
+    const sign = delta > 0 ? '+' : delta < 0 ? '−' : ''
+
+    return `${sign}${formatNumber(Math.abs(delta))} ${unit.value}`
 })
 
 const trend = computed(() => {

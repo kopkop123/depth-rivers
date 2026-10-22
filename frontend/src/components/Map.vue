@@ -11,7 +11,11 @@
             {{ mapNotice }}
         </div>
         <div class="map__zoom">
-            {{ mapReady ? `Масштаб ${map?.getZoom() ?? 6}×` : 'Завантаження карти' }}
+            {{ mapReady ? `Масштаб ${zoom}×` : 'Завантаження карти' }}
+            <template v-if="totalStations > stations.length">
+                · Показано {{ formatInteger(stations.length) }} із
+                {{ formatInteger(totalStations) }}
+            </template>
         </div>
     </section>
 </template>
@@ -21,14 +25,15 @@ import { onMounted, onUnmounted, ref, nextTick, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useStations } from '../composables/useStations.js'
-import { escapeHtml, formatNumber } from '../utils/utils.js'
+import { escapeHtml, formatInteger, formatNumber } from '../utils/utils.js'
 
-const emit = defineEmits(['station-state', 'stations-state'])
+const emit = defineEmits(['station-state', 'stations-state', 'station-selected'])
 
 const HOME_COORDINATES = [48.7, 31.2]
 
 const mapElement = ref(null)
 const search = ref('')
+const zoom = ref(6)
 
 let map
 let markersLayer
@@ -48,6 +53,7 @@ const {
     stationsError,
     measurementsError,
     mapNotice,
+    totalStations,
     loadStations,
     selectStation,
     clearSelectedStation,
@@ -72,6 +78,10 @@ const {
                 animate: true,
             })
         }
+    },
+
+    onSelect() {
+        emit('station-selected')
     },
 })
 
@@ -120,13 +130,20 @@ function searchStations(query) {
     clearTimeout(searchTimer)
 
     searchTimer = setTimeout(() => {
-        loadStations({ query: query.trim() })
+        const trimmed = query.trim()
+
+        // Для пошуку підганяємо карту під знайдені станції
+        loadStations({ query: trimmed, fit: Boolean(trimmed) })
     }, 300)
 }
 
 function retryStations() {
     clearTimeout(searchTimer)
     loadStations({ query: search.value.trim() })
+}
+
+function loadMoreStations() {
+    loadStations({ append: true })
 }
 
 function focusStation(station) {
@@ -142,6 +159,10 @@ onMounted(async () => {
     }).addTo(map)
 
     markersLayer = L.layerGroup().addTo(map)
+
+    map.on('zoomend', () => {
+        zoom.value = map.getZoom()
+    })
 
     map.on('moveend', () => {
         clearTimeout(moveTimer)
@@ -175,7 +196,7 @@ watch(
 )
 
 watch(
-    [stations, selectedId, loadingStations, stationsError, mapNotice],
+    [stations, selectedId, loadingStations, stationsError, mapNotice, totalStations],
     () => {
         emit('stations-state', {
             stations: stations.value,
@@ -183,6 +204,7 @@ watch(
             loadingStations: loadingStations.value,
             stationsError: stationsError.value,
             mapNotice: mapNotice.value,
+            totalStations: totalStations.value,
         })
     },
     { immediate: true },
@@ -193,6 +215,7 @@ defineExpose({
     clearSelectedStation,
     searchStations,
     retryStations,
+    loadMoreStations,
     focusStation,
 
     retryMeasurements() {

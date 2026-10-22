@@ -16,6 +16,7 @@ const stationsState = ref({
     loadingStations: false,
     stationsError: '',
     mapNotice: '',
+    totalStations: 0,
 })
 
 const stationState = ref({
@@ -46,6 +47,10 @@ function retryStations() {
     mapComponentRef.value?.retryStations()
 }
 
+function loadMoreStations() {
+    mapComponentRef.value?.loadMoreStations()
+}
+
 function focusStation(station) {
     mapComponentRef.value?.focusStation(station)
 }
@@ -70,6 +75,11 @@ function openSearchSidebar() {
 function openStationCard() {
     isStationCardOpen.value = true
     isSearchSidebarOpen.value = false
+}
+
+function onStationSelected() {
+    // Висувна картка існує лише на вузьких екранах; на широких вона завжди видима
+    if (window.matchMedia('(max-width: 1260px)').matches) openStationCard()
 }
 
 function closeSidebars() {
@@ -117,6 +127,8 @@ function closeSidebars() {
                 :loading-stations="stationsState.loadingStations"
                 :stations-error="stationsState.stationsError"
                 :map-notice="stationsState.mapNotice"
+                :total="stationsState.totalStations"
+                @load-more="loadMoreStations"
                 @search-input="onSearchInput"
                 @clear-search="clearSearch"
                 @retry-stations="retryStations"
@@ -128,6 +140,7 @@ function closeSidebars() {
                 ref="mapComponentRef"
                 @station-state="onStationState"
                 @stations-state="onStationsState"
+                @station-selected="onStationSelected"
             />
             <StationCard
                 v-bind="stationState"
@@ -163,7 +176,7 @@ function closeSidebars() {
     position: fixed;
     inset: 0;
     z-index: 2000;
-    display: block;
+    display: none;
     width: 100%;
     height: 100%;
     padding: 0;
@@ -209,6 +222,10 @@ function closeSidebars() {
     }
 
     .station-card-button {
+        display: block;
+    }
+
+    .page__backdrop {
         display: block;
     }
 

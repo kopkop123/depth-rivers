@@ -12,6 +12,16 @@ export function formatNumber(value) {
     })
 }
 
+export function formatInteger(value) {
+    return Number(value).toLocaleString('uk-UA', { maximumFractionDigits: 0 })
+}
+
+export function formatTime(value) {
+    if (!value) return '—'
+
+    return new Date(value).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+}
+
 export function formatDate(value, options = { day: '2-digit', month: 'short' }) {
     if (!value) return '—'
 

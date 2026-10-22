@@ -59,13 +59,15 @@ export function useStations({
     const stationsError = ref('')
     const measurementsError = ref('')
     const mapNotice = ref('')
+    const totalStations = ref(0)
 
+    let lastParams = ''
     let stationRequestId = 0
     let measurementRequestId = 0
     let stationController
     let measurementController
 
-    async function loadStations({ query = '', fit = false } = {}) {
+    async function loadStations({ query = '', fit = false, append = false } = {}) {
         const requestId = ++stationRequestId
 
         stationController?.abort()
@@ -75,16 +77,26 @@ export function useStations({
         stationsError.value = ''
         mapNotice.value = ''
 
-        const params = new URLSearchParams({ limit: '100' })
+        let params
 
-        if (query) {
-            params.set('search', query)
+        if (append) {
+            // Продовжуємо попередній запит (той самий bbox/search), а не поточну область карти
+            params = new URLSearchParams(lastParams)
+            params.set('cursor', String(stations.value.length))
         } else {
-            const boundsQuery = getBoundsQuery?.()
+            params = new URLSearchParams({ limit: '100' })
 
-            if (boundsQuery) {
-                params.set('bbox', boundsQuery)
+            if (query) {
+                params.set('search', query)
+            } else {
+                const boundsQuery = getBoundsQuery?.()
+
+                if (boundsQuery) {
+                    params.set('bbox', boundsQuery)
+                }
             }
+
+            lastParams = params.toString()
         }
 
         try {
@@ -92,9 +104,21 @@ export function useStations({
 
             if (requestId !== stationRequestId) return
 
-            stations.value = result.data || []
+            const incoming = result.data || []
 
-            if (!stations.value.length) {
+            if (append) {
+                const known = new Set(stations.value.map((station) => station.id))
+                stations.value = [
+                    ...stations.value,
+                    ...incoming.filter((station) => !known.has(station.id)),
+                ]
+            } else {
+                stations.value = incoming
+            }
+
+            totalStations.value = result.pagination?.totalItems ?? stations.value.length
+
+            if (!append && !stations.value.length) {
                 mapNotice.value = query
                     ? 'За вашим запитом станцій не знайдено.'
                     : 'У цій області станцій не знайдено. Спробуйте змінити масштаб карти.'
@@ -102,12 +126,19 @@ export function useStations({
 
             renderMarkers?.()
 
-            if (fit && stations.value.length) {
+            if (fit && !append && stations.value.length) {
                 fitStations?.(stations.value)
             }
         } catch (error) {
             if (error.name !== 'AbortError' && requestId === stationRequestId) {
-                stationsError.value = error.message || 'Не вдалося завантажити станції.'
+                const message = error.message || 'Не вдалося завантажити станції.'
+
+                // Помилка догрузки не повинна стирати вже показаний список
+                if (append) {
+                    mapNotice.value = message
+                } else {
+                    stationsError.value = message
+                }
             }
         } finally {
             if (requestId === stationRequestId) {
@@ -191,8 +222,10 @@ export function useStations({
         stationsError,
         measurementsError,
         mapNotice,
+        totalStations,
         loadStations,
         selectStation,
         clearSelectedStation,
+        cancelRequests,
     }
 }
