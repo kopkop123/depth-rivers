@@ -78,4 +78,10 @@ defineEmits(['goHome'])
         text-transform: uppercase;
     }
 }
+
+@media (max-width: 860px) {
+    .header {
+        padding: 0 16px;
+    }
+}
 </style>

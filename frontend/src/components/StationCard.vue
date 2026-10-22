@@ -5,7 +5,13 @@
                 class="station-card__close"
                 aria-label="Скасувати вибір станції"
                 type="button"
-                @click="emit('close')"
+                @click="
+                    () => {
+                        if (!isMobile) emit('close')
+
+                        emit('close-sidebars')
+                    }
+                "
             >
                 &#10005;
             </button>
@@ -228,11 +234,16 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    isMobile: {
+        type: Boolean,
+        default: false,
+    },
 })
 
-const { selectedStation, measurements, loadingMeasurements, measurementsError } = toRefs(props)
+const { selectedStation, measurements, loadingMeasurements, measurementsError, isMobile } =
+    toRefs(props)
 
-const emit = defineEmits(['close', 'retry'])
+const emit = defineEmits(['close', 'retry', 'close-sidebars'])
 
 const activeRange = ref('7')
 
